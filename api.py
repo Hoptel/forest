@@ -8,7 +8,6 @@ from passlib.hash import pbkdf2_sha512 as sha512
 from flask import Flask, abort, request, jsonify, g, url_for
 from flask_httpauth import HTTPTokenAuth
 from flask_sqlalchemy import SQLAlchemy
-from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 # initialization
 app = Flask(__name__)
