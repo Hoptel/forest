@@ -1,4 +1,4 @@
-# gorest
+# forest
 Restful API for open hotels, with login, info, and statistics
 
 ## Installation
