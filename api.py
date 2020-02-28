@@ -19,7 +19,7 @@ app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 # extensions
 db = SQLAlchemy(app)
 auth = HTTPTokenAuth()
-apiPrefix = '/gorest'
+apiPrefix = '/forest'
 
 #TODO split this stuff into a different py file and amke sure no circular dependencies
 class AuthToken(db.Model):
