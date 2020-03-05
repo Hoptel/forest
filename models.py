@@ -5,9 +5,10 @@ from passlib.hash import pbkdf2_sha512 as sha512
 
 from extensions import db
 
+
 class AuthToken(db.Model):
     __tablename__ = 'auth_token'
-    id = db.Column (db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     token_type = db.Column(db.String(40), default='bearer')
     access_token = db.Column(db.String(64), unique=True, nullable=False)
     refresh_token = db.Column(db.String(64), index=True)
@@ -28,7 +29,8 @@ class AuthToken(db.Model):
 
     @staticmethod
     def generate_token():
-        return ''.join([str(y) for x in range(64) for y in random.choice('0123456789abcdef')])
+        return ''.join([str(y) for x in range(64) for y in random.choice(
+            '0123456789abcdef')])
 
     def generate_token_set(self):
         self.access_token = self.generate_token()
@@ -38,9 +40,10 @@ class AuthToken(db.Model):
         return True
 
     def generate_token_access(self):
-        self.access_token = generate_token()
+        self.access_token = self.generate_token()
         self.issued_at = int(time.time())
         return True
+
 
 class APIUser(db.Model):
     __tablename__ = 'api_user'
