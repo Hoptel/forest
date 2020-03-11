@@ -2,6 +2,7 @@
 import time
 import random
 from passlib.hash import pbkdf2_sha512 as sha512
+from sqlalchemy_utils import UUIDType
 
 from extensions import db
 
@@ -12,9 +13,10 @@ class AuthToken(db.Model):
     token_type = db.Column(db.String(40), default='bearer')
     access_token = db.Column(db.String(64), unique=True, nullable=False)
     refresh_token = db.Column(db.String(64), index=True)
-    revoked = db.Column(db.Boolean, default=False)
+    revoked = db.Column(db.Boolean, nullable=False, default=False)
     issued_at = db.Column(db.Integer, nullable=False, default=lambda: int(time.time()))
     expires_in = db.Column(db.Integer, nullable=False, default=86400)
+    scope = db.Column(db.Integer, nullable=False, default=1)
     user_id = db.Column(db.Integer, db.ForeignKey('api_user.id', ondelete='CASCADE'))
     user = db.relationship('APIUser')
 
@@ -54,11 +56,17 @@ class APIUser(db.Model):
     __tablename__ = 'api_user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), index=True)
-    password_hash = db.Column(db.String(64))
-    admin = db.Column(db.Boolean, default=False, nullable=False)
+    password_hash = db.Column(db.String(256))
+    authLevel = db.Column(db.Integer, default=1, nullable=False)
 
     def hash_password(self, password):
         self.password_hash = sha512.hash(password)
 
     def verify_password(self, password):
         return sha512.verify(password, self.password_hash)
+
+
+class BaseModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(64))
+    gid = db.Column(UUIDType(binary=False), unique=True, nullable=False)
