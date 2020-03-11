@@ -1,10 +1,18 @@
 #!/usr/bin/env python
 import time
 import random
+import uuid
 from passlib.hash import pbkdf2_sha512 as sha512
 from sqlalchemy_utils import UUIDType
 
 from extensions import db
+
+
+class BaseModel(db.Model):
+    __abstract__ = True
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(64))
+    gid = db.Column(UUIDType(binary=False), unique=True, nullable=False, default=uuid.uuid4())
 
 
 class AuthToken(db.Model):
@@ -52,9 +60,8 @@ class AuthToken(db.Model):
         return True
 
 
-class APIUser(db.Model):
+class APIUser(BaseModel):
     __tablename__ = 'api_user'
-    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(256))
     authLevel = db.Column(db.Integer, default=1, nullable=False)
@@ -64,9 +71,3 @@ class APIUser(db.Model):
 
     def verify_password(self, password):
         return sha512.verify(password, self.password_hash)
-
-
-class BaseModel(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(64))
-    gid = db.Column(UUIDType(binary=False), unique=True, nullable=False)

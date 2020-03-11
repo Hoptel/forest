@@ -18,22 +18,21 @@ blueprint = Blueprint("forest", __name__, url_prefix="/forest")
 # if this returns true, the method gets executed, otherwise a 401 is returned
 @auth.verify_token
 def verify_token(token):
-    '''# first try to authenticate by token
-    user = APIUser.verify_auth_token(username_or_token)
-    if not user:
-        # try to authenticate with username/password
-        user = APIUser.query.filter_by(username=username_or_token).first()
-        if not user or not user.verify_password(password):
-            return False
-    g.user = user'''
+    # Getting the token
+    userToken = AuthToken.query.filter_by(access_token=token).first()
+    if (userToken is None or userToken.get_is_invalid()):
+        abort(401)
+    g.userID = userToken.user_id
+    g.authLevel = userToken.scope
     return True
 
 
 # TODO require admin status to be able to make this
 @blueprint.route('/users', methods=['POST'])
 def new_user():
-    username = request.get_json(force=True)['username']
-    password = request.get_json(force=True)['password']
+    requestJson = request.get_json(force=True)
+    username = requestJson['username']
+    password = requestJson['password']
     if username is None or password is None:
         abort(400)    # missing arguments
     if APIUser.query.filter_by(username=username).first() is not None:
@@ -54,19 +53,11 @@ def get_user(id):
     return jsonify({'username': user.username})
 
 
-# TODO remove
-@blueprint.route('/token')
-@auth.login_required
-def get_auth_token():
-    token = g.user.generate_auth_token(600)
-    return jsonify({'token': token.decode('ascii'), 'duration': 600})
-
-
 # TODO replace with proper endpoints once testing is done
 @blueprint.route('/resource')
 @auth.login_required
 def get_resource():
-    return jsonify({'data': 'Hello, World!'})
+    return jsonify({'data': 'Hello ' + APIUser.query.filter_by(id=g.userID).first().username})
 
 
 @blueprint.route('/auth/login', methods=['POST'])
