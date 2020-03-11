@@ -3,6 +3,8 @@ from flask import abort, request, jsonify, g, url_for, Blueprint
 
 import extensions
 import models
+import time
+
 
 auth = extensions.auth
 db = extensions.db
@@ -88,19 +90,19 @@ def post_login():
         # if no token is found, make one
         if (userToken is None):
             userToken = AuthToken()
-            userToken.generate_token_set()
+            userToken.generate_token_set(loginAPIUser)
             db.session.add(userToken)
             db.session.commit()
         # if revoked generate new token set
         elif (userToken.revoked):
-            userToken.generate_token_set()
+            userToken.generate_token_set(loginAPIUser)
         # elif expired generate new auth token and reset timer
         elif (userToken.get_is_expired()):
             userToken.generate_token_access()
         # return token set
         aToken = userToken.access_token
         rToken = userToken.refresh_token
-        exp = userToken.expires_in
+        exp = userToken.get_expires_at() - int(time.time())
         tType = userToken.token_type
         return jsonify({'access_token': aToken,
                         'refresh_token': rToken,
@@ -116,10 +118,10 @@ def post_login():
         if (userToken is None):
             abort(400)
         else:
-            userToken.generate_token_set()
+            userToken.generate_token_set(userToken.user)
             aToken = userToken.access_token
             rToken = userToken.refresh_token
-            exp = userToken.expires_in
+            exp = userToken.get_expires_at() - int(time.time())
             tType = userToken.token_type
             return jsonify({'access_token': aToken,
                             'refresh_token': rToken,
