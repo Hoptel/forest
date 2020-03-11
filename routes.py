@@ -57,7 +57,7 @@ def get_user(id):
 @blueprint.route('/resource')
 @auth.login_required
 def get_resource():
-    return jsonify({'data': 'Hello ' + APIUser.query.filter_by(id=g.userID).first().username})
+    return extensions.dataResultSuccess('Hello ' + APIUser.query.filter_by(id=g.userID).first().username)
 
 
 @blueprint.route('/auth/login', methods=['POST'])
