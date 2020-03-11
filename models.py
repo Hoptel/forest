@@ -27,6 +27,9 @@ class AuthToken(db.Model):
     def get_is_expired(self):
         return self.get_expires_at <= int(time.time())
 
+    def get_is_invalid(self):
+        return self.get_is_expired or self.revoked
+
     @staticmethod
     def generate_token():
         return ''.join([str(y) for x in range(64) for y in random.choice(
