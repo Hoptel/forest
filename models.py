@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import time
 import random
-import uuid
 from passlib.hash import pbkdf2_sha512 as sha512
 from sqlalchemy_utils import UUIDType
 
@@ -12,7 +11,7 @@ class BaseModel(db.Model):
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64))
-    gid = db.Column(UUIDType(binary=False), unique=True, nullable=False, default=uuid.uuid4())
+    gid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
 
 
 class AuthToken(db.Model):

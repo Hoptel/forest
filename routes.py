@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-from flask import abort, request, jsonify, g, url_for, Blueprint
+from flask import abort, request, jsonify, g, url_for, Blueprint, send_from_directory
 
 import extensions
 import models
 import time
+import os
+import uuid
 
 
 auth = extensions.auth
@@ -13,7 +15,6 @@ AuthToken = models.AuthToken
 
 blueprint = Blueprint("forest", __name__, url_prefix="/forest")
 
-# TODO edit this method to only work with tokens
 # This method seems to be called on everything that has [@auth.login_required],
 # if this returns true, the method gets executed, otherwise a 401 is returned
 @auth.verify_token
@@ -39,6 +40,7 @@ def new_user():
         abort(400)    # existing user
     user = APIUser(username=username)
     user.hash_password(password)
+    user.gid = uuid.uuid4()
     db.session.add(user)
     db.session.commit()
     return (jsonify({'username': user.username}), 201, {'Location': url_for('forest.get_user', id=user.id, _external=True)})
