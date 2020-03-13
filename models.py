@@ -70,3 +70,10 @@ class APIUser(BaseModel):
 
     def verify_password(self, password):
         return sha512.verify(password, self.password_hash)
+
+
+class DBFile(BaseModel):
+    __tablename__ = 'dbfile'
+    masterid = db.Column(UUIDType(binary=False))  # gid of the item that the file is attached to
+    filename = db.Column(db.String(32))
+    filetype = db.Column(db.String(8))  # The extension of the file (.jpg, .png)
