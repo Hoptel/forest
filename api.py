@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 from flask import Flask
 
-from extensions import db
+from extensions import db, getCurrenciesFromAPI
+
+import threading
+import time
+import uuid
+
+
+currencyThread = None
 
 
 def create_app():
@@ -26,8 +33,29 @@ def create_app():
 
     app.register_blueprint(blueprint)
 
+    currencyThread = threading.Thread(target=putCurrenciesInDB, args=(app,))
+    currencyThread.start()
+
     return app
+
+
+def putCurrenciesInDB(app):
+    import models
+    while(True):
+        with app.app_context():
+            currDict = getCurrenciesFromAPI()
+            print('getting the currency data')
+            for key, value in currDict.items():
+                curr = models.Currency.query.filter_by(code=key).first()
+                if (curr is None):
+                    curr = models.Currency(code=key, value=value, gid=uuid.uuid4())
+                    db.session.add(curr)
+                else:
+                    curr.value = value
+            db.session.commit()
+        time.sleep(7200)  # should be 3600 by default (there's a bug that makes it run twice for some reason)
 
 
 app = create_app()
 app.run(debug=True)
+currencyThread.join()

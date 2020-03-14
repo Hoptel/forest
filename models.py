@@ -82,4 +82,4 @@ class DBFile(BaseModel):
 # value of current currency (vcc), value of convert to currency (vtc), conversion is amount*(vtc/vcc)
 class Currency(BaseModel):
     __tablename__ = 'currency'
-    value = db.column(db.Float)
+    value = db.Column(db.Float)
