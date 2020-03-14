@@ -77,3 +77,9 @@ class DBFile(BaseModel):
     masterid = db.Column(UUIDType(binary=False))  # gid of the item that the file is attached to
     filename = db.Column(db.String(32))
     filetype = db.Column(db.String(8))  # The extension of the file (.jpg, .png)
+
+
+# value of current currency (vcc), value of convert to currency (vtc), conversion is amount*(vtc/vcc)
+class Currency(BaseModel):
+    __tablename__ = 'currency'
+    value = db.column(db.Float)

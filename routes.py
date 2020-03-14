@@ -59,7 +59,7 @@ def get_user(id):
 @blueprint.route('/resource')
 @auth.login_required
 def get_resource():
-    return extensions.dataResultSuccess('Hello ' + APIUser.query.filter_by(id=g.userID).first().username)
+    return extensions.dataResultSuccess('Hello ' + APIUser.query.get(g.userID).username)
 
 
 @blueprint.route('/auth/login', methods=['POST'])
@@ -147,9 +147,9 @@ def load():
             fileext = fileNameList[1]
             fileItem = models.DBFile(masterid=masterID, gid=uuid.uuid4(), filename=filename, filetype=fileext)
             if (masterID is not None):
-                os.makedirs(os.path.dirname(__file__) + "/storage/dbfile/" + str(masterID), exist_ok=True)
+                os.makedirs(os.path.dirname(__file__) + "/storage/dbfile", str(masterID), exist_ok=True)
                 file.save(os.path.join(
-                    os.path.dirname(__file__) + '/storage/dbfile/', str(masterID) + '/' + str(fileItem.gid) + '.' + fileext))
+                    os.path.dirname(__file__) + '/storage/dbfile', str(masterID), str(fileItem.gid) + '.' + fileext))
             else:
                 os.makedirs(os.path.dirname(__file__) + "/storage/dbfile", exist_ok=True)
                 file.save(os.path.join(
@@ -173,4 +173,8 @@ def load():
             abort(400)
         if (dbFileItem is None):
             abort(404)
-        return send_from_directory(os.path.join(os.path.dirname(__file__), 'storage/dbfile', str(dbFileItem.masterid)), (str(dbFileItem.gid) + '.' + dbFileItem.filetype))
+        return send_from_directory(os.path.join(
+            os.path.dirname(__file__),
+            'storage/dbfile',
+            str(dbFileItem.masterid)),
+            (str(dbFileItem.gid) + '.' + dbFileItem.filetype))
