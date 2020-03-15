@@ -34,7 +34,7 @@ def create_app():
     app.register_blueprint(blueprint)
 
     currencyThread = threading.Thread(target=putCurrenciesInDB, args=(app,))
-    currencyThread.start()
+    # currencyThread.start() enable for testing and production only
 
     return app
 
