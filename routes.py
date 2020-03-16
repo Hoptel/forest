@@ -58,7 +58,7 @@ def get_user_info():
         # 'hotelrefno': g.user.hotelrefno,
         'userid': g.user.id,
         # 'shortcode': g.user.shortcode,
-    }, spuriousParameters=request.args.to_dict())
+    }, spuriousParameters=list(request.args.to_dict().keys()))
 
 
 # TODO replace with proper endpoints once testing is done
