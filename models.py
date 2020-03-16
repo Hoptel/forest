@@ -64,6 +64,7 @@ class APIUser(BaseModel):
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(256))
     authLevel = db.Column(db.Integer, default=1, nullable=False)
+    email = db.Column(db.String(64), unique=True)
 
     def hash_password(self, password):
         self.password_hash = sha512.hash(password)
