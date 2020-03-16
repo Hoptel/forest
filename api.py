@@ -34,7 +34,7 @@ def create_app():
     app.register_blueprint(blueprint)
 
     currencyThread = threading.Thread(target=putCurrenciesInDB, args=(app,))
-    # currencyThread.start() enable for testing and production only
+    currencyThread.start()  # enable for testing and production only
 
     return app
 
@@ -44,7 +44,6 @@ def putCurrenciesInDB(app):
     while(True):
         with app.app_context():
             currDict = getCurrenciesFromAPI()
-            print('getting the currency data')
             for key, value in currDict.items():
                 curr = models.Currency.query.filter_by(code=key).first()
                 if (curr is None):
@@ -53,9 +52,9 @@ def putCurrenciesInDB(app):
                 else:
                     curr.value = value
             db.session.commit()
-        time.sleep(7200)  # should be 3600 by default (there's a bug that makes it run twice for some reason)
+        time.sleep(3600)  # should be 3600 by default
 
 
 app = create_app()
-app.run(debug=True)
+app.run(debug=False)
 currencyThread.join()
