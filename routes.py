@@ -105,7 +105,7 @@ def post_login():
     elif (grant_type == 'refresh_token'):
         # if token login check refresh token
         userToken = AuthToken.query.filter_by(
-            refresh_token=request.json.get('refresh_token'))
+            refresh_token=request.json.get('refresh_token')).first()
         # if it matches generate a new auth token and reset timer
         # if revoked or no match return 400
         if (userToken is None):
