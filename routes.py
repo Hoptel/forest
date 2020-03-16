@@ -10,6 +10,7 @@ import uuid
 
 auth = extensions.auth
 db = extensions.db
+dataResultSuccess = extensions.dataResultSuccess
 APIUser = models.APIUser
 AuthToken = models.AuthToken
 
@@ -23,13 +24,13 @@ def verify_token(token):
     userToken = AuthToken.query.filter_by(access_token=token).first()
     if (userToken is None or userToken.get_is_invalid()):
         abort(401)
-    g.userID = userToken.user_id
+    g.user = userToken.user
     g.authLevel = userToken.scope
     return True
 
 
 # TODO require admin status to be able to make this
-@blueprint.route('/users', methods=['POST'])
+@blueprint.route('/user', methods=['POST'])
 def new_user():
     requestJson = request.get_json(force=True)
     username = requestJson['username']
@@ -46,20 +47,25 @@ def new_user():
     return (jsonify({'username': user.username}), 201, {'Location': url_for('forest.get_user', id=user.id, _external=True)})
 
 
-# TODO remove
-@blueprint.route('/users/<int:id>')
-def get_user(id):
-    user = APIUser.query.get(id)
-    if not user:
-        abort(400)
-    return jsonify({'username': user.username})
+@blueprint.route('/user/info')
+@auth.login_required
+def get_user_info():
+    return dataResultSuccess({
+        'authlevel': g.authLevel,
+        'code': g.user.username,
+        'email': g.user.email,
+        'gid': g.user.gid,
+        # 'hotelrefno': g.user.hotelrefno,
+        'userid': g.user.id,
+        # 'shortcode': g.user.shortcode,
+    }, spuriousParameters=request.args.to_dict())
 
 
 # TODO replace with proper endpoints once testing is done
 @blueprint.route('/resource')
 @auth.login_required
 def get_resource():
-    return extensions.dataResultSuccess('Hello ' + APIUser.query.get(g.userID).username)
+    return dataResultSuccess('Hello ' + g.user.username)
 
 
 @blueprint.route('/auth/login', methods=['POST'])
