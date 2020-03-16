@@ -10,7 +10,7 @@ db = SQLAlchemy()
 auth = HTTPTokenAuth()
 
 
-def dataResultSuccess(data, msg="", spuriousParameters=[], count=1, code=200):
+def dataResultSuccess(data, msg="", spuriousParameters={}, count=1, code=200):
     return (jsonify({"success": True, "msg": msg, "spurious-parameters": spuriousParameters, "data": data, "count": count}), code)
 
 
