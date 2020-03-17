@@ -34,7 +34,10 @@ class AuthToken(db.Model):
         return self.issued_at + self.expires_in
 
     def get_is_expired(self):
-        return self.get_expires_at() <= int(time.time())
+        if (self.expires_in == 0):
+            return False
+        else:
+            return self.get_expires_at() <= int(time.time())
 
     def get_is_invalid(self):
         return self.get_is_expired() or self.revoked

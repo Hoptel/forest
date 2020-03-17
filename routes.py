@@ -7,6 +7,8 @@ import time
 import os
 import uuid
 
+import json
+
 
 auth = extensions.auth
 db = extensions.db
@@ -184,3 +186,10 @@ def load():
             'storage/dbfile',
             str(dbFileItem.masterid)),
             (str(dbFileItem.gid) + '.' + dbFileItem.filetype))
+
+
+@blueprint.route('/table')
+def parameter():
+    queryparam = request.args.to_dict()['query']
+     
+    return json.loads("{" + queryparam + "}")  
