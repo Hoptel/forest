@@ -192,11 +192,12 @@ def load():
 def parameter():
     queryparam = request.args.to_dict()['query']
     newQueryParam = "{"
-    queryList = queryparam.split(',')
+    queryparam = queryparam.replace(' ', '')  # Remove all whitespaces
+    queryList = queryparam.split(',')  # split the string into queries
     for part in queryList:
-        subParts = part.split(':')
-        newQueryParam += '"' + subParts[0] + '":"' + subParts[1] + '",'
-    newQueryParam = newQueryParam[:-1]
-    newQueryParam += '}'
+        subParts = part.split(':')  # further split things into key, value pairs
+        newQueryParam += '"' + subParts[0] + '":"' + subParts[1] + '",'  # reconstruct the key value pairs in the new parameter
+    newQueryParam = newQueryParam[:-1]  # remove the last trailing comma
+    newQueryParam += '}'  # finish by adding the closing bracket
     print(newQueryParam)
     return json.loads(newQueryParam)
