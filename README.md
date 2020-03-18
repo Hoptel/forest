@@ -1,6 +1,8 @@
 # Forest
 Restful API for open hotels, with login, info, and statistics
 
+<img src=https://github.com/Hoptel/forest/blob/master/forestLogoPlain.svg width="300"/>
+
 ## Installation
 1. Set up python 3.6.9 (this is the one we're using).
 2. in your terminal type `pip install requirements.txt`, don't forget to press Enter.
