@@ -191,5 +191,12 @@ def load():
 @blueprint.route('/table')
 def parameter():
     queryparam = request.args.to_dict()['query']
-     
-    return json.loads("{" + queryparam + "}")  
+    newQueryParam = "{"
+    queryList = queryparam.split(',')
+    for part in queryList:
+        subParts = part.split(':')
+        newQueryParam += '"' + subParts[0] + '":"' + subParts[1] + '",'
+    newQueryParam = newQueryParam[:-1]
+    newQueryParam += '}'
+    print(newQueryParam)
+    return json.loads(newQueryParam)
