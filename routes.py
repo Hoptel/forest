@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-from flask import abort, request, jsonify, g, url_for, Blueprint, send_from_directory
+from flask import abort, request, jsonify, g, Blueprint, send_from_directory
+from sqlalchemy import and_
 
 import extensions
 import models
 import time
 import os
 import uuid
-
-import json
 
 
 auth = extensions.auth
@@ -32,21 +31,43 @@ def verify_token(token):
 
 
 # TODO require admin status to be able to make this
-@blueprint.route('/user', methods=['POST'])
-def new_user():
+@blueprint.route('/user', methods=['GET', 'POST'])
+def endpoint_user():
+    if (request.method == 'POST'):
+        return new_user(request)
+    else:
+        return query_user(request)
+
+
+def query_user(request):  # TODO make this a general function
+    params = request.args.to_dict()
+    filters = extensions.queryToJson(params.pop('query')) if 'query' in params else {}
+    filterList = []
+    itemList = []
+    for key, value in filters.items():
+        column = getattr(APIUser, key, None)
+        columnFilter = column.like(value)
+        filterList.append(columnFilter)
+    queryItems = APIUser.query.filter(and_(*filterList)).all()
+    for item in queryItems:
+        itemList.append(item.to_dict())
+    return dataResultSuccess(itemList, spuriousParameters=list(params.keys()), count=len(itemList))
+
+
+def new_user(request):
     requestJson = request.get_json(force=True)
     username = requestJson['username']
     password = requestJson['password']
     if username is None or password is None:
-        abort(400)    # missing arguments
+        return('Missing Data', 400)    # missing arguments
     if APIUser.query.filter_by(username=username).first() is not None:
-        abort(400)    # existing user
+        return('Existing User', 400)    # existing user
     user = APIUser(username=username)
     user.hash_password(password)
     user.gid = uuid.uuid4()
     db.session.add(user)
     db.session.commit()
-    return (jsonify({'username': user.username}), 201, {'Location': url_for('forest.get_user', id=user.id, _external=True)})
+    return (jsonify({'username': user.username}), 201)
 
 
 @blueprint.route('/user/info')
@@ -186,18 +207,3 @@ def load():
             'storage/dbfile',
             str(dbFileItem.masterid)),
             (str(dbFileItem.gid) + '.' + dbFileItem.filetype))
-
-
-@blueprint.route('/table')
-def parameter():
-    queryparam = request.args.to_dict()['query']
-    newQueryParam = "{"
-    queryparam = queryparam.replace(' ', '')  # Remove all whitespaces
-    queryList = queryparam.split(',')  # split the string into queries
-    for part in queryList:
-        subParts = part.split(':')  # further split things into key, value pairs
-        newQueryParam += '"' + subParts[0] + '":"' + subParts[1] + '",'  # reconstruct the key value pairs in the new parameter
-    newQueryParam = newQueryParam[:-1]  # remove the last trailing comma
-    newQueryParam += '}'  # finish by adding the closing bracket
-    print(newQueryParam)
-    return json.loads(newQueryParam)
