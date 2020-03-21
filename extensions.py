@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask_httpauth import HTTPTokenAuth
 from flask_sqlalchemy import SQLAlchemy
-from flask import jsonify
+from flask import jsonify, make_response
 
 import requests
 import json
@@ -11,7 +11,7 @@ auth = HTTPTokenAuth()
 
 
 def dataResultSuccess(data, msg="", spuriousParameters=[], count=1, code=200):
-    return (jsonify({"success": True, "msg": msg, "spuriousparameters": spuriousParameters, "data": data, "count": count}), code)
+    return make_response((jsonify({"success": True, "msg": msg, "spuriousparameters": spuriousParameters, "data": data, "count": count}), code))
 
 
 def getCurrenciesFromAPI():
@@ -25,3 +25,16 @@ def getCurrenciesFromAPI():
     # get only the rates object (since we don't care about much else in the response)
     responseJson = json.loads(responseString)['rates']
     return responseJson
+
+
+# TODO parse a json formatted query directly instead of giving an error
+def queryToJson(queryParam):
+    newQueryParam = "{"
+    queryParam = queryParam.replace(' ', '')  # Remove all whitespaces
+    queryList = queryParam.split(',')  # split the string into queries
+    for part in queryList:
+        subParts = part.split(':')  # further split things into key, value pairs
+        newQueryParam += '"' + subParts[0] + '":"' + subParts[1] + '",'  # reconstruct the key value pairs in the new parameter
+    newQueryParam = newQueryParam[:-1]  # remove the last trailing comma
+    newQueryParam += '}'  # finish by adding the closing bracket
+    return json.loads(newQueryParam)
