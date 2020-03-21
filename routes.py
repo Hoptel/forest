@@ -82,7 +82,6 @@ def post_login():
             abort(400)    # missing arguments
         # if an email is received, get only the first part (good job failing that Hotech!!)
         username = username.split('@')[0]
-
         loginAPIUser = APIUser.query.filter_by(username=username).first()
         if (not loginAPIUser or not loginAPIUser.verify_password(password)):
             abort(400)  # incorrect password / username
@@ -131,6 +130,12 @@ def post_login():
     else:
         abort(400)
         return None
+
+
+@blueprint.route('/auth/logout')
+@auth.login_required
+def logout():
+    g.user.revoked = True
 
 # TODO maybe make this its own blueprint and separate blueprints
 @blueprint.route('/dbfile/load', methods=['GET', 'POST'])
