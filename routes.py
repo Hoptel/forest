@@ -30,16 +30,19 @@ def verify_token(token):
     return True
 
 
-# TODO require admin status to be able to make this
-@blueprint.route('/user', methods=['GET', 'POST'])
+@blueprint.route('/user', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def endpoint_user():
     if (request.method == 'POST'):
-        return new_user(request)
+        return new_user()
+    elif (request.method == 'GET'):
+        return query_user()
+    elif (request.method == 'PATCH'):
+        return update_user()
     else:
-        return query_user(request)
+        return delete_user()
 
 
-def query_user(request):  # TODO make this a general function
+def query_user():  # TODO make this a general function
     params = request.args.to_dict()
     filters = extensions.queryToJson(params.pop('query')) if 'query' in params else {}
     filterList = []
@@ -54,7 +57,7 @@ def query_user(request):  # TODO make this a general function
     return dataResultSuccess(itemList, spuriousParameters=list(params.keys()), count=len(itemList))
 
 
-def new_user(request):
+def new_user():  # TODO require admin status to be able to make this
     requestJson = request.get_json(force=True)
     username = requestJson['username']
     password = requestJson['password']
@@ -68,6 +71,31 @@ def new_user(request):
     db.session.add(user)
     db.session.commit()
     return dataResultSuccess(user.to_dict(), code=201, spuriousParameters=list(request.args.to_dict().keys()))
+
+# TODO the next 2 methods share a lot of similar code, maybe turn the shared code into a function
+
+
+def update_user():  # TODO require an admin or the user himself to do this
+    args = request.args.to_dict()
+    body = request.get_json(force=True)
+    gid = args.pop('gid') if 'gid' in args else abort(400)  # TODO make this work with ID as well (maybe anything unique if you have time)
+    user = APIUser.query.filter_by(gid=gid).first()
+    if (user is None):
+        abort(404)
+    user.set_columns(**body)
+    if ('password' in body):
+        user.hash_password(body['password'])
+    return dataResultSuccess(user.to_dict(), code=200, spuriousParameters=list(args.keys()))
+
+
+def delete_user():
+    args = request.args.to_dict()
+    gid = args.pop('gid') if 'gid' in args else abort(400)  # TODO make this work with ID as well (maybe anything unique if you have time)
+    user = APIUser.query.filter_by(gid=gid).first()
+    if (user is None):
+        abort(404)
+    user.delete()
+    return ('user deleted', 200)
 
 
 @blueprint.route('/user/info')
