@@ -3,7 +3,7 @@ import extensions
 import models
 import time
 
-from flask import abort, request, jsonify, g, Blueprint
+from flask import abort, request, jsonify, Blueprint
 
 auth = extensions.auth
 db = extensions.db
@@ -77,6 +77,11 @@ def post_login():
 
 
 @auth_blueprint.route('/logout')
-@auth.login_required
 def logout():
-    g.user.revoked = True
+    auth_type, token = request.headers['Authorization'].split(None, 1)
+    if (token is None):
+        abort(401)
+    tokenItem = AuthToken.query.filter_by(access_token=token).first()
+    tokenItem.revoked = True
+    db.session.commit()
+    return ('logout successful', 200)
