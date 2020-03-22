@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-from flask import Flask
-
-from extensions import db, getCurrenciesFromAPI
-
 import threading
 import time
 import uuid
+
+from flask import Flask
+from extensions import db, getCurrenciesFromAPI
 
 
 currencyThread = None
@@ -32,8 +31,10 @@ def create_app():
     from routes import blueprint
 
     app.register_blueprint(blueprint)
+
     currencyThread = threading.Thread(target=putCurrenciesInDB, args=(app,))
     #currencyThread.start()  # enable for testing and production only
+
     return app
 
 
