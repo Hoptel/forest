@@ -190,8 +190,7 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
                         )
                 else:
                     if (
-                        self.__mapper__.relationships[key].query_class is not None
-                        or self.__mapper__.relationships[key].instrument_class
+                        self.__mapper__.relationships[key].query_class is not None or self.__mapper__.relationships[key].instrument_class
                         is not None
                     ):
                         item = getattr(self, key)

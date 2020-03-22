@@ -28,9 +28,15 @@ def create_app():
         db.create_all()
         db.session.commit()
 
-    from routes import blueprint
+    from routes.routes import verify_token  # noqa: F401
+    from routes.user import user_blueprint
+    from routes.dbfile import dbfile_blueprint
+    from routes.auth import auth_blueprint
 
-    app.register_blueprint(blueprint)
+    app.register_blueprint(auth_blueprint)
+    app.register_blueprint(user_blueprint)
+    app.register_blueprint(dbfile_blueprint)
+
 
     currencyThread = threading.Thread(target=putCurrenciesInDB, args=(app,))
     #currencyThread.start()  # enable for testing and production only
