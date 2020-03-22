@@ -62,12 +62,12 @@ def new_user(request):
         return('Missing Data', 400)    # missing arguments
     if APIUser.query.filter_by(username=username).first() is not None:
         return('Existing User', 400)    # existing user
-    user = APIUser(username=username)
+    user = APIUser(**requestJson)
     user.hash_password(password)
-    user.gid = uuid.uuid4()
+    user.gid = user.gid or uuid.uuid4()
     db.session.add(user)
     db.session.commit()
-    return (jsonify({'username': user.username}), 201)
+    return dataResultSuccess(user.to_dict(), code=201, spuriousParameters=list(request.args.to_dict().keys()))
 
 
 @blueprint.route('/user/info')

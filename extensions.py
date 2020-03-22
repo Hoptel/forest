@@ -40,3 +40,7 @@ def queryToJson(queryParam):
     newQueryParam = newQueryParam[:-1]  # remove the last trailing comma
     newQueryParam += '}'  # finish by adding the closing bracket
     return json.loads(newQueryParam)
+
+
+def timeNow():
+    return datetime.utcnow().replace(microsecond=0).isoformat()

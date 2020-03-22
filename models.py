@@ -1,19 +1,129 @@
 #!/usr/bin/env python
-import time
 import random
 import json
+import time
+
 from passlib.hash import pbkdf2_sha512 as sha512
 from sqlalchemy_utils import UUIDType
+from sqlalchemy import not_
 from sqlalchemy.orm.attributes import QueryableAttribute
 
-from extensions import db
+from extensions import db, timeNow
 
 
-class BaseModel(db.Model):
+class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO format)
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64))
     gid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
+
+    def __init__(self, **kwargs):
+        kwargs['_force'] = True
+        self._set_columns(**kwargs)
+
+    def _set_columns(self, **kwargs):
+        force = kwargs.get('_force')
+
+        readonly = []
+        if hasattr(self, '_readonly_fields'):
+            readonly = self.readonly_fields
+        if hasattr(self, '_hidden_fields'):
+            readonly += self._hidden_fields
+
+        readonly += [
+            'id',
+            'created',
+            'updated',
+            'modified',
+            'created_at',
+            'updated_at',
+            'modified_at',
+        ]
+
+        changes = {}
+
+        columns = self.__table__.columns.keys()
+        relationships = self.__mapper__.relationships.keys()
+
+        for key in columns:
+            allowed = True if force or key not in readonly else False
+            exists = True if key in kwargs else False
+            if allowed and exists:
+                val = getattr(self, key)
+                if val != kwargs[key]:
+                    changes[key] = {'old': val, 'new': kwargs[key]}
+                    setattr(self, key, kwargs[key])
+
+        for rel in relationships:
+            allowed = True if force or rel not in readonly else False
+            exists = True if rel in kwargs else False
+            if allowed and exists:
+                is_list = self.__mapper__.relationships[rel].uselist
+                if is_list:
+                    valid_ids = []
+                    query = getattr(self, rel)
+                    cls = self.__mapper__.relationships[rel].argument()
+                    for item in kwargs[rel]:
+                        if 'id' in item and query.filter_by(id=item['id']).limit(1).count() == 1:
+                            obj = cls.query.filter_by(id=item['id']).first()
+                            col_changes = obj.set_columns(**item)
+                            if col_changes:
+                                col_changes['id'] = str(item['id'])
+                                if rel in changes:
+                                    changes[rel].append(col_changes)
+                                else:
+                                    changes.update({rel: [col_changes]})
+                            valid_ids.append(str(item['id']))
+                        else:
+                            col = cls()
+                            col_changes = col.set_columns(**item)
+                            query.append(col)
+                            db.session.flush()
+                            if col_changes:
+                                col_changes['id'] = str(col.id)
+                                if rel in changes:
+                                    changes[rel].append(col_changes)
+                                else:
+                                    changes.update({rel: [col_changes]})
+                            valid_ids.append(str(col.id))
+
+                    # delete related rows that were not in kwargs[rel]
+                    for item in query.filter(not_(cls.id.in_(valid_ids))).all():
+                        col_changes = {
+                            'id': str(item.id),
+                            'deleted': True,
+                        }
+                        if rel in changes:
+                            changes[rel].append(col_changes)
+                        else:
+                            changes.update({rel: [col_changes]})
+                        db.session.delete(item)
+
+                else:
+                    val = getattr(self, rel)
+                    if self.__mapper__.relationships[rel].query_class is not None:
+                        if val is not None:
+                            col_changes = val.set_columns(**kwargs[rel])
+                            if col_changes:
+                                changes.update({rel: col_changes})
+                    else:
+                        if val != kwargs[rel]:
+                            setattr(self, rel, kwargs[rel])
+                            changes[rel] = {'old': val, 'new': kwargs[rel]}
+
+        return changes
+
+    def set_columns(self, **kwargs):
+        self._changes = self._set_columns(**kwargs)
+        if 'modified' in self.__table__.columns:
+            self.modified = timeNow()
+        if 'updated' in self.__table__.columns:
+            self.updated = timeNow()
+        if 'modified_at' in self.__table__.columns:
+            self.modified_at = timeNow()
+        if 'updated_at' in self.__table__.columns:
+            self.updated_at = timeNow()
+        return self._changes
 
     def to_dict(self, show=None, _hide=[], _path=None):
         """Return a dictionary representation of this model."""
