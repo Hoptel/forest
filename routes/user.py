@@ -4,7 +4,7 @@ import models
 import uuid
 
 from flask import abort, request, g, Blueprint
-from sqlalchemy import and_
+from routes.route_utilities import table_get, table_delete
 
 auth = extensions.auth
 db = extensions.db
@@ -28,18 +28,7 @@ def endpoint_user():
 
 
 def query_user():  # TODO make this a general function
-    params = request.args.to_dict()
-    filters = extensions.queryToJson(params.pop('query')) if 'query' in params else {}
-    filterList = []
-    itemList = []
-    for key, value in filters.items():
-        column = getattr(APIUser, key, None)
-        columnFilter = column.like(value)
-        filterList.append(columnFilter)
-    queryItems = APIUser.query.filter(and_(*filterList)).all()
-    for item in queryItems:
-        itemList.append(item.to_dict())
-    return dataResultSuccess(itemList, spuriousParameters=list(params.keys()), count=len(itemList))
+    return table_get(APIUser)
 
 
 def new_user():  # TODO require admin status to be able to make this
@@ -74,13 +63,7 @@ def update_user():  # TODO require an admin or the user himself to do this
 
 
 def delete_user():
-    args = request.args.to_dict()
-    gid = args.pop('gid') if 'gid' in args else abort(400)  # TODO make this work with ID as well (maybe anything unique if you have time)
-    user = APIUser.query.filter_by(gid=gid).first()
-    if (user is None):
-        abort(404)
-    user.delete()
-    return ('user deleted', 200)
+    return table_delete(APIUser)
 
 
 @user_blueprint.route('/info')

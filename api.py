@@ -28,7 +28,7 @@ def create_app():
         db.create_all()
         db.session.commit()
 
-    from routes.routes import verify_token  # noqa: F401
+    from routes.route_utilities import verify_token  # noqa: F401
     from routes.user import user_blueprint
     from routes.dbfile import dbfile_blueprint
     from routes.auth import auth_blueprint
