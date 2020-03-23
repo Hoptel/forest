@@ -15,7 +15,7 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64))
-    gid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
+    guid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
 
     def __init__(self, **kwargs):
         kwargs['_force'] = True
@@ -296,7 +296,7 @@ class APIUser(BaseModel):
 
 class DBFile(BaseModel):
     __tablename__ = 'dbfile'
-    masterid = db.Column(UUIDType(binary=False))  # gid of the item that the file is attached to
+    masterid = db.Column(UUIDType(binary=False))  # guid of the item that the file is attached to
     filename = db.Column(db.String(32))
     filetype = db.Column(db.String(8))  # The extension of the file (.jpg, .png)
 

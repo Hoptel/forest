@@ -52,7 +52,7 @@ def putCurrenciesInDB(app):
             for key, value in currDict.items():
                 curr = models.Currency.query.filter_by(code=key).first()
                 if (curr is None):
-                    curr = models.Currency(code=key, value=value, gid=uuid.uuid4())
+                    curr = models.Currency(code=key, value=value, guid=uuid.uuid4())
                     db.session.add(curr)
                 else:
                     curr.value = value
@@ -61,5 +61,5 @@ def putCurrenciesInDB(app):
 
 
 app = create_app()
-app.run(debug=False)
+app.run(debug=True)
 currencyThread.join()

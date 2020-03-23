@@ -41,7 +41,7 @@ def new_user():  # TODO require admin status to be able to make this
         return('Existing User', 400)    # existing user
     user = APIUser(**requestJson)
     user.hash_password(password)
-    user.gid = user.gid or uuid.uuid4()
+    user.guid = user.guid or uuid.uuid4()
     db.session.add(user)
     db.session.commit()
     return dataResultSuccess(user.to_dict(), code=201, spuriousParameters=list(request.args.to_dict().keys()))
@@ -52,8 +52,8 @@ def new_user():  # TODO require admin status to be able to make this
 def update_user():  # TODO require an admin or the user himself to do this
     args = request.args.to_dict()
     body = request.get_json(force=True)
-    gid = args.pop('gid') if 'gid' in args else abort(400)  # TODO make this work with ID as well (maybe anything unique if you have time)
-    user = APIUser.query.filter_by(gid=gid).first()
+    guid = args.pop('guid') if 'guid' in args else abort(400)  # TODO make this work with ID as well (maybe anything unique if you have time)
+    user = APIUser.query.filter_by(guid=guid).first()
     if (user is None):
         abort(404)
     user.set_columns(**body)
@@ -73,7 +73,7 @@ def get_user_info():
         'authlevel': g.authLevel,
         'code': g.user.code or g.user.username,
         'email': g.user.email,
-        'gid': g.user.gid,
+        'guid': g.user.guid,
         # 'hotelrefno': g.user.hotelrefno,
         'userid': g.user.id,
         # 'shortcode': g.user.shortcode,

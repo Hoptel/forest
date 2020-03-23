@@ -27,23 +27,23 @@ def load():
         # removing the masterid paramerter if it is there
         if ('masterid' in params):
             masterID = params.pop('masterid')
-        # if not, then use the user's gid
+        # if not, then use the user's guid
         else:
-            masterID = g.user.gid
+            masterID = g.user.guid
         fileList = []
         for file in uploaded_files:
             fileNameList = file.filename.split('.')
             filename = fileNameList[0]
             fileext = fileNameList[1]
-            fileItem = models.DBFile(masterid=masterID, gid=uuid.uuid4(), filename=filename, filetype=fileext)
+            fileItem = models.DBFile(masterid=masterID, guid=uuid.uuid4(), filename=filename, filetype=fileext)
             if (masterID is not None):
                 os.makedirs(os.path.dirname(__file__) + "/storage/dbfile", str(masterID), exist_ok=True)
                 file.save(os.path.join(
-                    os.path.dirname(__file__) + '/storage/dbfile', str(masterID), str(fileItem.gid) + '.' + fileext))
+                    os.path.dirname(__file__) + '/storage/dbfile', str(masterID), str(fileItem.guid) + '.' + fileext))
             else:
                 os.makedirs(os.path.dirname(__file__) + "/storage/dbfile", exist_ok=True)
                 file.save(os.path.join(
-                    os.path.dirname(__file__) + '/storage/dbfile/', str(fileItem.gid) + '.' + fileext))
+                    os.path.dirname(__file__) + '/storage/dbfile/', str(fileItem.guid) + '.' + fileext))
             db.session.add(fileItem)
             fileList.append(file.filename)
         db.session.commit()
@@ -55,8 +55,8 @@ def load():
         dbFileItem = None
         if ('id' in arguments):
             dbFileItem = models.DBFile.query.filter_by(id=arguments['id']).first()
-        elif ('gid' in arguments):
-            dbFileItem = models.DBFile.query.filter_by(gid=arguments['gid']).first()
+        elif ('guid' in arguments):
+            dbFileItem = models.DBFile.query.filter_by(guid=arguments['guid']).first()
         elif ('masterid' in arguments & 'code' in arguments):
             dbFileItem = models.DBFile.query.filter_by(masterid=arguments['masterid'], code=arguments['code']).first()
         else:
@@ -67,4 +67,4 @@ def load():
             os.path.dirname(__file__),
             'storage/dbfile',
             str(dbFileItem.masterid)),
-            (str(dbFileItem.gid) + '.' + dbFileItem.filetype))
+            (str(dbFileItem.guid) + '.' + dbFileItem.filetype))
