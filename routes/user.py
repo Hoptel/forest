@@ -71,7 +71,7 @@ def delete_user():
 def get_user_info():
     return dataResultSuccess({
         'authlevel': g.authLevel,
-        'code': g.user.username,
+        'code': g.user.code or g.user.username,
         'email': g.user.email,
         'gid': g.user.gid,
         # 'hotelrefno': g.user.hotelrefno,
