@@ -12,7 +12,6 @@ dataResultSuccess = extensions.dataResultSuccess
 
 dbfile_blueprint = Blueprint("dbfile", __name__, url_prefix="/forest/dbfile")
 
-# TODO maybe make this its own blueprint and separate blueprints
 @dbfile_blueprint.route('/dbfile/load', methods=['GET', 'POST'])
 @auth.login_required
 def load():

@@ -27,7 +27,7 @@ def endpoint_user():
         return delete_user()
 
 
-def query_user():  # TODO make this a general function
+def query_user():
     return table_get(APIUser)
 
 
@@ -45,8 +45,6 @@ def new_user():  # TODO require admin status to be able to make this
     db.session.add(user)
     db.session.commit()
     return dataResultSuccess(user.to_dict(), code=201, spuriousParameters=list(request.args.to_dict().keys()))
-
-# TODO the next 2 methods share a lot of similar code, maybe turn the shared code into a function
 
 
 def update_user():  # TODO require an admin or the user himself to do this

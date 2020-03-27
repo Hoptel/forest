@@ -32,7 +32,6 @@ def getCurrenciesFromAPI():
     return responseJson
 
 
-# TODO parse a json formatted query directly instead of giving an error
 def queryToJson(queryParam):
     newQueryParam = "{"
     queryParam = queryParam.replace(' ', '')  # Remove all whitespaces
