@@ -336,7 +336,7 @@ class Employee(BaseModel):
     email = db.Column(db.String(64))
     fullname = db.Column(db.String(64))
     gender = db.Column(db.String(6))
-    haslogin = db.Column(db.Boolean())
+    #haslogin = db.Column(db.Boolean())
     iban = db.Column(db.String(26))
     idno = db.Column(db.String(64))
     maritalstatus = db.Column(db.Boolean())
