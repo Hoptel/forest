@@ -9,7 +9,7 @@ from sqlalchemy_utils import UUIDType
 from sqlalchemy import not_
 from sqlalchemy.orm.attributes import QueryableAttribute
 
-from extensions import db, dateTimeNow
+from extensions import db, dateTimeNow, dateFormat
 
 
 class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO format)
@@ -52,6 +52,17 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
             if allowed and exists:
                 val = getattr(self, key)
                 if val != kwargs[key]:
+                    if(kwargs[key] == 'null'):
+                        kwargs[key] = None
+                    elif (str(self.__table__.columns[key].type) == "BOOLEAN"):
+                        if (kwargs[key].lower() == "false"):
+                            kwargs[key] = False
+                        elif (kwargs[key].lower() == "true"):
+                            kwargs[key] = True
+                        else:
+                            kwargs[key] = None
+                    elif (str(self.__table__.columns[key].type) == "DATE"):
+                        kwargs[key] = datetime.strptime(kwargs[key], dateFormat)
                     changes[key] = {'old': val, 'new': kwargs[key]}
                     setattr(self, key, kwargs[key])
 
@@ -164,6 +175,11 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
             check = "%s.%s" % (_path, key)
             if check in _hide or key in hidden:
                 continue
+            if (str(self.__table__.columns[key].type) == "DATE"):
+                return_date = getattr(self, key)
+                if (return_date is not None):
+                    ret_data[key] = return_date.strftime(dateFormat)
+                    continue
             ret_data[key] = getattr(self, key)
 
         for key in relationships:
@@ -306,3 +322,28 @@ class DBFile(BaseModel):
 class Currency(BaseModel):
     __tablename__ = 'currency'
     value = db.Column(db.Float)
+
+
+class Employee(BaseModel):
+    __tablename__ = 'employee'
+    address = db.Column(db.String(256))
+    bankname = db.Column(db.String(64))
+    birthdate = db.Column(db.Date())
+    birthplace = db.Column(db.String(64))
+    bloodgrp = db.Column(db.String(3))
+    city = db.Column(db.String(64))
+    country = db.Column(db.String(64))
+    email = db.Column(db.String(64))
+    fullname = db.Column(db.String(64))
+    gender = db.Column(db.String(6))
+    haslogin = db.Column(db.Boolean())
+    iban = db.Column(db.String(26))
+    idno = db.Column(db.String(64))
+    maritalstatus = db.Column(db.Boolean())
+    paycurrid = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'))
+    salaryamount = db.Column(db.Float(), nullable=False, default=0.0)
+    salaryday = db.Column(db.Integer, nullable=False, default=1)
+    enddate = db.Column(db.Date())
+    tel = db.Column(db.String(16))
+    #hotels = db.Column(db.JSON())
+    userid = db.Column(db.Integer, db.ForeignKey('api_user.id', ondelete='SET NULL'))

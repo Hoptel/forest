@@ -23,7 +23,7 @@ def post_login():
         password = request.get_json(force=True)['password']
         if (username is None or password is None):
             abort(400)    # missing arguments
-        # if an email is received, get only the first part (good job failing that Hotech!!)
+        # if an email is received, get only the first part
         username = username.split('@')[0]
 
         loginAPIUser = APIUser.query.filter_by(username=username).first()

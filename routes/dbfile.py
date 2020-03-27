@@ -9,8 +9,6 @@ from flask import abort, request, g, Blueprint, send_from_directory
 auth = extensions.auth
 db = extensions.db
 dataResultSuccess = extensions.dataResultSuccess
-APIUser = models.APIUser
-AuthToken = models.AuthToken
 
 dbfile_blueprint = Blueprint("dbfile", __name__, url_prefix="/forest/dbfile")
 
