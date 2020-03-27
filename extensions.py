@@ -2,7 +2,7 @@
 import requests
 import json
 
-from datetime import datetime
+from time import strftime
 from flask_httpauth import HTTPTokenAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify, make_response
@@ -10,6 +10,9 @@ from flask import jsonify, make_response
 
 db = SQLAlchemy()
 auth = HTTPTokenAuth()
+dateFormat = "%Y-%m-%d"
+timeFormat = "%H:%M:%S"
+dateTimeFormat = dateFormat + "T" + timeFormat
 
 
 def dataResultSuccess(data, msg="", spuriousParameters=[], count=1, code=200):
@@ -42,5 +45,13 @@ def queryToJson(queryParam):
     return json.loads(newQueryParam)
 
 
+def dateTimeNow():
+    return strftime(dateTimeFormat)
+
+
 def timeNow():
-    return datetime.utcnow().replace(microsecond=0).isoformat()
+    return strftime(timeFormat)
+
+
+def dateNow():
+    return strftime.strftime(dateFormat)

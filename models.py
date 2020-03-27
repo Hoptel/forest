@@ -2,13 +2,14 @@
 import random
 import json
 import time
+from datetime import datetime
 
 from passlib.hash import pbkdf2_sha512 as sha512
 from sqlalchemy_utils import UUIDType
 from sqlalchemy import not_
 from sqlalchemy.orm.attributes import QueryableAttribute
 
-from extensions import db, timeNow
+from extensions import db, dateTimeNow
 
 
 class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO format)
@@ -116,13 +117,13 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
     def set_columns(self, **kwargs):
         self._changes = self._set_columns(**kwargs)
         if 'modified' in self.__table__.columns:
-            self.modified = timeNow()
+            self.modified = dateTimeNow()
         if 'updated' in self.__table__.columns:
-            self.updated = timeNow()
+            self.updated = dateTimeNow()
         if 'modified_at' in self.__table__.columns:
-            self.modified_at = timeNow()
+            self.modified_at = dateTimeNow()
         if 'updated_at' in self.__table__.columns:
-            self.updated_at = timeNow()
+            self.updated_at = dateTimeNow()
         return self._changes
 
     def to_dict(self, show=None, _hide=[], _path=None):
