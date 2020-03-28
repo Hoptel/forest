@@ -5,7 +5,7 @@ import uuid
 
 from flask import abort, request, g, Blueprint, send_from_directory
 from models import DBFile
-from extensions import table_ins, table_get, table_update, table_delete
+from routes.route_utilities import table_ins, table_get, table_update, table_delete
 
 auth = extensions.auth
 db = extensions.db
