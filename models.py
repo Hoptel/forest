@@ -17,6 +17,7 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64))
     guid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
+    hotelrefno = db.Column(db.Integer(), nullable=False)
 
     def __init__(self, **kwargs):
         kwargs['_force'] = True
@@ -347,3 +348,10 @@ class Employee(BaseModel):
     tel = db.Column(db.String(16))
     #hotels = db.Column(db.JSON())
     userid = db.Column(db.Integer, db.ForeignKey('api_user.id', ondelete='SET NULL'))
+
+
+class Hotel(BaseModel):
+    __tablename__ = 'hotel'
+    name: db.Column(db.String(64))
+    address: db.Column(db.String(255))
+    description: db.Column(db.String(64))
