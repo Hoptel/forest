@@ -337,7 +337,6 @@ class Employee(BaseModel):
     email = db.Column(db.String(64))
     fullname = db.Column(db.String(64))
     gender = db.Column(db.String(6))
-    #haslogin = db.Column(db.Boolean())
     iban = db.Column(db.String(26))
     idno = db.Column(db.String(64))
     maritalstatus = db.Column(db.Boolean())
@@ -346,7 +345,6 @@ class Employee(BaseModel):
     salaryday = db.Column(db.Integer, nullable=False, default=1)
     enddate = db.Column(db.Date())
     tel = db.Column(db.String(16))
-    #hotels = db.Column(db.JSON())
     userid = db.Column(db.Integer, db.ForeignKey('api_user.id', ondelete='SET NULL'))
 
 
@@ -355,3 +353,4 @@ class Hotel(BaseModel):
     name: db.Column(db.String(64))
     address: db.Column(db.String(255))
     description: db.Column(db.String(64))
+    hotelrefno: db.Column(db.Integer(), nullable=False, unique=True)
