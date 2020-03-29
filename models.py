@@ -248,7 +248,15 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
         return ret_data
 
 
-class AuthToken(db.Model):
+class BaseHotelModel(BaseModel):
+    abstract = True
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(64))
+    guid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
+    hotelrefno = db.Column(db.Integer(), nullable=False)
+
+
+class AuthToken(BaseModel):
     __tablename__ = 'auth_token'
     id = db.Column(db.Integer, primary_key=True)
     token_type = db.Column(db.String(40), default='bearer')
@@ -296,7 +304,7 @@ class AuthToken(db.Model):
         return True
 
 
-class APIUser(BaseModel):
+class APIUser(BaseHotelModel):
     __tablename__ = 'api_user'
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(256))
@@ -312,7 +320,7 @@ class APIUser(BaseModel):
         return sha512.verify(password, self.password_hash)
 
 
-class DBFile(BaseModel):
+class DBFile(BaseHotelModel):
     __tablename__ = 'dbfile'
     masterid = db.Column(UUIDType(binary=False))  # guid of the item that the file is attached to
     filename = db.Column(db.String(32))
@@ -320,12 +328,12 @@ class DBFile(BaseModel):
 
 
 # value of current currency (vcc), value of convert to currency (vtc), conversion is amount*(vtc/vcc)
-class Currency(BaseModel):
+class Currency(BaseHotelModel):
     __tablename__ = 'currency'
     value = db.Column(db.Float)
 
 
-class Employee(BaseModel):
+class Employee(BaseHotelModel):
     __tablename__ = 'employee'
     address = db.Column(db.String(256))
     bankname = db.Column(db.String(64))
@@ -348,7 +356,7 @@ class Employee(BaseModel):
     userid = db.Column(db.Integer, db.ForeignKey('api_user.id', ondelete='SET NULL'))
 
 
-class Hotel(BaseModel):
+class Hotel(BaseHotelModel):
     __tablename__ = 'hotel'
     name: db.Column(db.String(64))
     address: db.Column(db.String(255))
