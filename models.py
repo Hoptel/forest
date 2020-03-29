@@ -362,3 +362,10 @@ class Hotel(BaseHotelModel):
     address: db.Column(db.String(255))
     description: db.Column(db.String(64))
     hotelrefno: db.Column(db.Integer(), nullable=False, unique=True)
+
+
+class HotelEmployee(BaseModel):
+    __tablename__ = 'hotel_employee'
+    id = db.Column(db.Integer, primary_key=True)
+    hotelrefno = db.Column(db.Integer(), db.ForeignKey('hotel.hotelrefno', ondelete='CASCADE'), nullable=False)
+    employeeid = db.Column(db.Integer(), db.ForeignKey('employee.id', ondelete='CASCADE'), nullable=False)
