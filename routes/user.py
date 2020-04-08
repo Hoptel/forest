@@ -9,7 +9,7 @@ from routes.route_utilities import table_get, table_delete
 auth = extensions.auth
 db = extensions.db
 dataResultSuccess = extensions.dataResultSuccess
-APIUser = models.APIUser
+APIUser = models.User
 AuthToken = models.AuthToken
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/forest/user")

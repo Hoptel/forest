@@ -15,9 +15,6 @@ from extensions import db, dateTimeNow, dateFormat
 class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO format)
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(64))
-    guid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
-    hotelrefno = db.Column(db.Integer(), nullable=False)
 
     def __init__(self, **kwargs):
         kwargs['_force'] = True
@@ -249,11 +246,27 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
 
 
 class BaseHotelModel(BaseModel):
-    abstract = True
-    id = db.Column(db.Integer, primary_key=True)
+    __abstract__ = True
     code = db.Column(db.String(64))
     guid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
     hotelrefno = db.Column(db.Integer(), nullable=False)
+
+
+class User(BaseHotelModel):
+    __tablename__ = 'user'
+    hotelrefno = db.Column(db.Integer(), nullable=False)
+    username = db.Column(db.String(32), index=True)
+    password_hash = db.Column(db.String(256))
+    authLevel = db.Column(db.Integer, default=1, nullable=False)
+    email = db.Column(db.String(64), unique=True)
+
+    _hidden_fields = ["password_hash"]
+
+    def hash_password(self, password):
+        self.password_hash = sha512.hash(password)
+
+    def verify_password(self, password):
+        return sha512.verify(password, self.password_hash)
 
 
 class AuthToken(BaseModel):
@@ -266,7 +279,7 @@ class AuthToken(BaseModel):
     issued_at = db.Column(db.Integer, nullable=False, default=lambda: int(time.time()))
     expires_in = db.Column(db.Integer, nullable=False, default=86400)
     scope = db.Column(db.Integer, nullable=False, default=1)
-    user_id = db.Column(db.Integer, db.ForeignKey('api_user.id', ondelete='CASCADE'))
+    userid = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('APIUser')
 
     def get_expires_in(self):
@@ -304,22 +317,6 @@ class AuthToken(BaseModel):
         return True
 
 
-class APIUser(BaseHotelModel):
-    __tablename__ = 'api_user'
-    username = db.Column(db.String(32), index=True)
-    password_hash = db.Column(db.String(256))
-    authLevel = db.Column(db.Integer, default=1, nullable=False)
-    email = db.Column(db.String(64), unique=True)
-
-    _hidden_fields = ["password_hash"]
-
-    def hash_password(self, password):
-        self.password_hash = sha512.hash(password)
-
-    def verify_password(self, password):
-        return sha512.verify(password, self.password_hash)
-
-
 class DBFile(BaseHotelModel):
     __tablename__ = 'dbfile'
     masterid = db.Column(UUIDType(binary=False))  # guid of the item that the file is attached to
@@ -328,8 +325,9 @@ class DBFile(BaseHotelModel):
 
 
 # value of current currency (vcc), value of convert to currency (vtc), conversion is amount*(vtc/vcc)
-class Currency(BaseHotelModel):
+class Currency(BaseModel):
     __tablename__ = 'currency'
+    code = db.Column(db.String(64))
     value = db.Column(db.Float)
 
 
@@ -342,7 +340,6 @@ class Employee(BaseHotelModel):
     bloodgrp = db.Column(db.String(3))
     city = db.Column(db.String(64))
     country = db.Column(db.String(64))
-    email = db.Column(db.String(64))
     fullname = db.Column(db.String(64))
     gender = db.Column(db.String(6))
     iban = db.Column(db.String(26))
@@ -353,7 +350,7 @@ class Employee(BaseHotelModel):
     salaryday = db.Column(db.Integer, nullable=False, default=1)
     enddate = db.Column(db.Date())
     tel = db.Column(db.String(16))
-    userid = db.Column(db.Integer, db.ForeignKey('api_user.id', ondelete='SET NULL'))
+    userid = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'))
 
 
 class Hotel(BaseHotelModel):
@@ -366,6 +363,5 @@ class Hotel(BaseHotelModel):
 
 class HotelEmployee(BaseModel):
     __tablename__ = 'hotel_employee'
-    id = db.Column(db.Integer, primary_key=True)
     hotelrefno = db.Column(db.Integer(), db.ForeignKey('hotel.hotelrefno', ondelete='CASCADE'), nullable=False)
     employeeid = db.Column(db.Integer(), db.ForeignKey('employee.id', ondelete='CASCADE'), nullable=False)

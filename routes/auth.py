@@ -7,7 +7,7 @@ from flask import abort, request, jsonify, Blueprint
 
 auth = extensions.auth
 db = extensions.db
-APIUser = models.APIUser
+APIUser = models.User
 AuthToken = models.AuthToken
 
 auth_blueprint = Blueprint("auth", __name__, url_prefix="/forest/auth")
