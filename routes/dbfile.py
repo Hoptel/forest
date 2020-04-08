@@ -27,7 +27,7 @@ def endpoint_dbfile():
         return table_delete(DBFile)
 
 
-@dbfile_blueprint.route('/dbfile/load', methods=['GET', 'POST'])
+@dbfile_blueprint.route('/load', methods=['GET', 'POST'])
 @auth.login_required
 def load():
     # uploading
