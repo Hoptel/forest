@@ -5,11 +5,13 @@ import json
 from time import strftime
 from flask_httpauth import HTTPTokenAuth
 from flask_sqlalchemy import SQLAlchemy
+from flask_alembic import Alembic
 from flask import jsonify, make_response
 
 
 db = SQLAlchemy()
 auth = HTTPTokenAuth()
+alembic = Alembic()
 dateFormat = "%Y-%m-%d"
 timeFormat = "%H:%M:%S"
 dateTimeFormat = dateFormat + "T" + timeFormat

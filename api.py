@@ -4,7 +4,7 @@ import time
 import uuid
 
 from flask import Flask
-from extensions import db, getCurrenciesFromAPI
+from extensions import db, getCurrenciesFromAPI, alembic
 
 
 currencyThread = None
@@ -20,6 +20,7 @@ def create_app():
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
     app.config['UPLOAD_FOLDER'] = '/storage/dbfile'
 
+    alembic.init_app(app)
     db.init_app(app)
 
     import models  # noqa: F401
@@ -27,6 +28,8 @@ def create_app():
     with app.app_context():
         db.create_all()
         db.session.commit()
+        alembic.revision('making changes')
+        alembic.upgrade()
 
     from routes.route_utilities import verify_token  # noqa: F401
     from routes.user import user_blueprint
@@ -59,9 +62,12 @@ def putCurrenciesInDB(app):
                 else:
                     curr.value = value
             db.session.commit()
-        time.sleep(3600)  # should be 3600 by default
+        time.sleep(3600)
 
 
 app = create_app()
-app.run(debug=True)
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
 currencyThread.join()
