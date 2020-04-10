@@ -1,6 +1,10 @@
 #!/usr/bin/env python
+import threading
+import time
+import uuid
+
 from flask import Flask
-from extensions import db, alembic
+from extensions import db, getCurrenciesFromAPI, alembic
 
 
 currencyThread = None
@@ -31,12 +35,34 @@ def create_app():
     from routes.user import user_blueprint
     from routes.dbfile import dbfile_blueprint
     from routes.auth import auth_blueprint
+    from routes.employee import employee_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(user_blueprint)
     app.register_blueprint(dbfile_blueprint)
+    app.register_blueprint(employee_blueprint)
+
+
+    currencyThread = threading.Thread(target=putCurrenciesInDB, args=(app,))
+    #currencyThread.start()  # enable for testing and production only
 
     return app
+
+
+def putCurrenciesInDB(app):
+    import models
+    while(True):
+        with app.app_context():
+            currDict = getCurrenciesFromAPI()
+            for key, value in currDict.items():
+                curr = models.Currency.query.filter_by(code=key).first()
+                if (curr is None):
+                    curr = models.Currency(code=key, value=value, guid=uuid.uuid4())
+                    db.session.add(curr)
+                else:
+                    curr.value = value
+            db.session.commit()
+        time.sleep(3600)
 
 
 app = create_app()
