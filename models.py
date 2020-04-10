@@ -245,16 +245,14 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
         return ret_data
 
 
-class BaseHotelModel(BaseModel):
+class BaseDataModel(BaseModel):
     __abstract__ = True
     code = db.Column(db.String(64))
     guid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
-    hotelrefno = db.Column(db.Integer(), nullable=False)
 
 
-class User(BaseHotelModel):
+class User(BaseDataModel):
     __tablename__ = 'user'
-    hotelrefno = db.Column(db.Integer(), nullable=False)
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(256))
     authLevel = db.Column(db.Integer, default=1, nullable=False)
@@ -317,51 +315,8 @@ class AuthToken(BaseModel):
         return True
 
 
-class DBFile(BaseHotelModel):
+class DBFile(BaseDataModel):
     __tablename__ = 'dbfile'
     masterid = db.Column(UUIDType(binary=False))  # guid of the item that the file is attached to
     filename = db.Column(db.String(32))
     filetype = db.Column(db.String(8))  # The extension of the file (.jpg, .png)
-
-
-# value of current currency (vcc), value of convert to currency (vtc), conversion is amount*(vtc/vcc)
-class Currency(BaseModel):
-    __tablename__ = 'currency'
-    code = db.Column(db.String(64))
-    value = db.Column(db.Float)
-
-
-class Employee(BaseHotelModel):
-    __tablename__ = 'employee'
-    address = db.Column(db.String(256))
-    bankname = db.Column(db.String(64))
-    birthdate = db.Column(db.Date())
-    birthplace = db.Column(db.String(64))
-    bloodgrp = db.Column(db.String(3))
-    city = db.Column(db.String(64))
-    country = db.Column(db.String(64))
-    fullname = db.Column(db.String(64))
-    gender = db.Column(db.String(6))
-    iban = db.Column(db.String(26))
-    idno = db.Column(db.String(64))
-    maritalstatus = db.Column(db.Boolean())
-    paycurrid = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'))
-    salaryamount = db.Column(db.Float(), nullable=False, default=0.0)
-    salaryday = db.Column(db.Integer, nullable=False, default=1)
-    enddate = db.Column(db.Date())
-    tel = db.Column(db.String(16))
-    userid = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'))
-
-
-class Hotel(BaseHotelModel):
-    __tablename__ = 'hotel'
-    name: db.Column(db.String(64))
-    address: db.Column(db.String(255))
-    description: db.Column(db.String(64))
-    hotelrefno: db.Column(db.Integer(), nullable=False, unique=True)
-
-
-class HotelEmployee(BaseModel):
-    __tablename__ = 'hotel_employee'
-    hotelrefno = db.Column(db.Integer(), db.ForeignKey('hotel.hotelrefno', ondelete='CASCADE'), nullable=False)
-    employeeid = db.Column(db.Integer(), db.ForeignKey('employee.id', ondelete='CASCADE'), nullable=False)
