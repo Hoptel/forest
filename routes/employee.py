@@ -9,10 +9,10 @@ auth = extensions.auth
 db = extensions.db
 dataResultSuccess = extensions.dataResultSuccess
 
-employee_blueprint = Blueprint("employee", __name__, url_prefix='/forest/employee')
+employee_blueprint = Blueprint("employee", __name__, url_prefix='/employee')
 
 
-@auth.login_required
+@auth.login_required(1)
 @employee_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'UPDATE'])
 def endpoint_employee():
     if (request.method == 'POST'):

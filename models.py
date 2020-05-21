@@ -9,10 +9,10 @@ from sqlalchemy_utils import UUIDType
 from sqlalchemy import not_
 from sqlalchemy.orm.attributes import QueryableAttribute
 
-from extensions import db, dateTimeNow, dateFormat
+from extensions import db, dateFormat, dateTimeFormat
 
 
-class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO format)
+class BaseModel(db.Model):
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
 
@@ -25,7 +25,7 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
 
         readonly = []
         if hasattr(self, '_readonly_fields'):
-            readonly = self.readonly_fields
+            readonly = self._readonly_fields
         if hasattr(self, '_hidden_fields'):
             readonly += self._hidden_fields
 
@@ -53,14 +53,16 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
                     if(kwargs[key] == 'null'):
                         kwargs[key] = None
                     elif (str(self.__table__.columns[key].type) == "BOOLEAN"):
-                        if (kwargs[key].lower() == "false"):
+                        if (str(kwargs[key]).lower == "false"):
                             kwargs[key] = False
-                        elif (kwargs[key].lower() == "true"):
+                        elif (str(kwargs[key]).lower == "true"):
                             kwargs[key] = True
                         else:
                             kwargs[key] = None
                     elif (str(self.__table__.columns[key].type) == "DATE"):
                         kwargs[key] = datetime.strptime(kwargs[key], dateFormat)
+                    elif (str(self.__table__.columns[key].type) == "DATETIME"):
+                        kwargs[key] = datetime.strptime(kwargs[key], dateTimeFormat)
                     changes[key] = {'old': val, 'new': kwargs[key]}
                     setattr(self, key, kwargs[key])
 
@@ -126,13 +128,13 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
     def set_columns(self, **kwargs):
         self._changes = self._set_columns(**kwargs)
         if 'modified' in self.__table__.columns:
-            self.modified = dateTimeNow()
+            self.modified = datetime.utcnow()
         if 'updated' in self.__table__.columns:
-            self.updated = dateTimeNow()
+            self.updated = datetime.utcnow()
         if 'modified_at' in self.__table__.columns:
-            self.modified_at = dateTimeNow()
+            self.modified_at = datetime.utcnow()
         if 'updated_at' in self.__table__.columns:
-            self.updated_at = dateTimeNow()
+            self.updated_at = datetime.utcnow()
         return self._changes
 
     def to_dict(self, show=None, _hide=[], _path=None):
@@ -173,10 +175,15 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
             check = "%s.%s" % (_path, key)
             if check in _hide or key in hidden:
                 continue
-            if (str(self.__table__.columns[key].type) == "DATE"):
+            elif (str(self.__table__.columns[key].type) == "DATE"):
                 return_date = getattr(self, key)
                 if (return_date is not None):
                     ret_data[key] = return_date.strftime(dateFormat)
+                    continue
+            elif (str(self.__table__.columns[key].type) == "DATETIME"):
+                return_date_time = getattr(self, key)
+                if (return_date_time is not None):
+                    ret_data[key] = return_date_time.strftime(dateTimeFormat)
                     continue
             ret_data[key] = getattr(self, key)
 
@@ -245,20 +252,22 @@ class BaseModel(db.Model):  # TODO add modified_at and created_at fields (in ISO
         return ret_data
 
 
-class BaseHotelModel(BaseModel):
+class BaseDataModel(BaseModel):
     __abstract__ = True
     code = db.Column(db.String(64))
     guid = db.Column(UUIDType(binary=False), nullable=False, unique=True)  # set this in the route to uuid.uuid4
     hotelrefno = db.Column(db.Integer(), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+    modified_at = db.Column(db.DateTime)
 
 
-class User(BaseHotelModel):
+class User(BaseDataModel):
     __tablename__ = 'user'
-    hotelrefno = db.Column(db.Integer(), nullable=False)
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(256))
     authLevel = db.Column(db.Integer, default=1, nullable=False)
     email = db.Column(db.String(64), unique=True)
+    auth_token = db.relationship('AuthToken', back_populates='user', cascade='all, delete, delete-orphan')
 
     _hidden_fields = ["password_hash"]
 
@@ -280,7 +289,9 @@ class AuthToken(BaseModel):
     expires_in = db.Column(db.Integer, nullable=False, default=86400)
     scope = db.Column(db.Integer, nullable=False, default=1)
     userid = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('APIUser')
+    user = db.relationship('User', back_populates='auth_token')
+
+    _readonly_fields = ['token_type', 'issued_at', 'scope']
 
     def get_expires_in(self):
         return self.expires_in
@@ -309,6 +320,7 @@ class AuthToken(BaseModel):
         self.issued_at = int(time.time())
         self.user = API_user
         self.user_id = API_user.id
+        self.scope = API_user.authLevel
         return True
 
     def generate_token_access(self):
@@ -317,7 +329,7 @@ class AuthToken(BaseModel):
         return True
 
 
-class DBFile(BaseHotelModel):
+class DBFile(BaseDataModel):
     __tablename__ = 'dbfile'
     masterid = db.Column(UUIDType(binary=False))  # guid of the item that the file is attached to
     filename = db.Column(db.String(32))
@@ -331,7 +343,7 @@ class Currency(BaseModel):
     value = db.Column(db.Float)
 
 
-class Employee(BaseHotelModel):
+class Employee(BaseDataModel):
     __tablename__ = 'employee'
     address = db.Column(db.String(256))
     bankname = db.Column(db.String(64))
@@ -353,7 +365,7 @@ class Employee(BaseHotelModel):
     userid = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'))
 
 
-class Hotel(BaseHotelModel):
+class Hotel(BaseDataModel):
     __tablename__ = 'hotel'
     name: db.Column(db.String(64))
     address: db.Column(db.String(255))
@@ -361,6 +373,7 @@ class Hotel(BaseHotelModel):
     hotelrefno: db.Column(db.Integer(), nullable=False, unique=True)
 
 
+#TODO replace with a relationship
 class HotelEmployee(BaseModel):
     __tablename__ = 'hotel_employee'
     hotelrefno = db.Column(db.Integer(), db.ForeignKey('hotel.hotelrefno', ondelete='CASCADE'), nullable=False)

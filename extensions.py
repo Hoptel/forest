@@ -3,10 +3,10 @@ import requests
 import json
 
 from time import strftime
-from flask_httpauth import HTTPTokenAuth
+from custom_httpauth import HTTPTokenAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask_alembic import Alembic
-from flask import jsonify, make_response
+from flask import jsonify, make_response, abort
 
 
 db = SQLAlchemy()
@@ -19,6 +19,14 @@ dateTimeFormat = dateFormat + "T" + timeFormat
 
 def dataResultSuccess(data, msg="", spuriousParameters=[], count=1, code=200):
     return make_response((jsonify({"success": True, "msg": msg, "spuriousparameters": spuriousParameters, "data": data, "count": count}), code))
+
+
+def resultSuccess(msg="", spuriousParameters=[], code=200):
+    return make_response((jsonify({"success": True, "msg": msg, "spuriousparameters": spuriousParameters}), code))
+
+
+def resultFailure(msg, code):
+    abort(make_response(jsonify({"success": False, "msg": msg}), code))
 
 
 def getCurrenciesFromAPI():
