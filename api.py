@@ -36,11 +36,21 @@ def create_app():
     from routes.dbfile import dbfile_blueprint
     from routes.auth import auth_blueprint
     from routes.employee import employee_blueprint
+    from routes.cost import cost_blueprint
+    from routes.reservation import reservation_blueprint
+    from routes.roomtype import roomtype_blueprint
+    from routes.room import room_blueprint
+    from routes.sale import sale_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(user_blueprint)
     app.register_blueprint(dbfile_blueprint)
     app.register_blueprint(employee_blueprint)
+    app.register_blueprint(cost_blueprint)
+    app.register_blueprint(reservation_blueprint)
+    app.register_blueprint(roomtype_blueprint)
+    app.register_blueprint(room_blueprint)
+    app.register_blueprint(sale_blueprint)
 
 
     currencyThread = threading.Thread(target=putCurrenciesInDB, args=(app,))

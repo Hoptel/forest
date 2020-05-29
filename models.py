@@ -357,7 +357,7 @@ class Employee(BaseDataModel):
     iban = db.Column(db.String(26))
     idno = db.Column(db.String(64))
     maritalstatus = db.Column(db.Boolean())
-    paycurrid = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'))
+    paycurrid = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
     salaryamount = db.Column(db.Float(), nullable=False, default=0.0)
     salaryday = db.Column(db.Integer, nullable=False, default=1)
     enddate = db.Column(db.Date())
@@ -373,8 +373,55 @@ class Hotel(BaseDataModel):
     hotelrefno: db.Column(db.Integer(), nullable=False, unique=True)
 
 
-#TODO replace with a relationship
+# TODO replace with a relationship
 class HotelEmployee(BaseModel):
     __tablename__ = 'hotel_employee'
     hotelrefno = db.Column(db.Integer(), db.ForeignKey('hotel.hotelrefno', ondelete='CASCADE'), nullable=False)
     employeeid = db.Column(db.Integer(), db.ForeignKey('employee.id', ondelete='CASCADE'), nullable=False)
+
+
+class Room(BaseDataModel):
+    __tablename__ = 'room'
+    description = db.Column(db.String(128))
+    bedcount = db.Column(db.Integer())
+    # bedtype
+    # roomstate
+    currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
+    price = db.Column(db.Float(), nullable=False)
+    roomtype = db.Column(db.Integer(), db.ForeignKey('roomtype.id', ondelete='NO ACTION'))
+    roomno = db.Column(db.Integer(), nullable=False)
+
+
+class RoomType(BaseDataModel):
+    __tablename__ = 'roomtype'
+    description = db.Column(db.String(128))
+    bedcount = db.Column(db.Integer())
+    # bedtype
+    # roomstate
+    currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
+    price = db.Column(db.Float(), nullable=False)
+    roomno = db.Column(db.Integer(), nullable=False)
+
+# class RoomState(BaseDataModel):
+
+
+class Sale(BaseDataModel):
+    __tablename__ = 'sale'
+    description = db.Column(db.String(128))
+    price = db.Column(db.Float(), nullable=False)
+    currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
+    reservation = db.Column(db.Integer(), db.ForeignKey('reservation.id', ondelete='NO ACTION'))
+
+
+class Cost(BaseDataModel):
+    __tablename__ = 'cost'
+    description = db.Column(db.String(128))
+    price = db.Column(db.Float(), nullable=False)
+    currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
+
+
+class Reservation(BaseDataModel):
+    __tablename__ = 'reservation'
+    startdate = db.Column(db.Date())
+    enddate = db.Column(db.Date())
+    roomno = db.Column(db.Integer(), db.ForeignKey('room.roomno', ondelete='NO ACTION'), nullable=False)
