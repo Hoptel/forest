@@ -34,6 +34,8 @@ def table_ins():
             for key in Room.__table__.columns.keys:
                 if key not in requestJson.keys:
                     requestJson[key] = roomType[key]
+    if ('pricechild' not in requestJson.keys):
+        requestJson['pricechild'] = requestJson['price']
     item = Room(**requestJson)
     item.guid = item.guid or uuid.uuid4()
     db.session.add(item)

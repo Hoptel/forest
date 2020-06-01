@@ -388,6 +388,7 @@ class Room(BaseDataModel):
     # roomstate
     currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
     price = db.Column(db.Float(), nullable=False)
+    pricechild = db.Column(db.Float(), nullable=False)
     roomtype = db.Column(db.Integer(), db.ForeignKey('roomtype.id', ondelete='NO ACTION'))
     roomno = db.Column(db.Integer(), nullable=False)
 
@@ -400,6 +401,7 @@ class RoomType(BaseDataModel):
     # roomstate
     currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
     price = db.Column(db.Float(), nullable=False)
+    pricechild = db.Column(db.Float(), nullable=False)
     roomno = db.Column(db.Integer(), nullable=False)
 
 # class RoomState(BaseDataModel):
