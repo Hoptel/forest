@@ -3,6 +3,7 @@ import requests
 import json
 
 from time import strftime
+from datetime import datetime
 from custom_httpauth import HTTPTokenAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask_alembic import Alembic
@@ -64,3 +65,7 @@ def timeNow():
 
 def dateNow():
     return strftime.strftime(dateFormat)
+
+
+def stringToDateTime(input):
+    return datetime.strptime(input, '%Y-%m-%d')

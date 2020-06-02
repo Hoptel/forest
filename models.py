@@ -390,7 +390,7 @@ class Room(BaseDataModel):
     price = db.Column(db.Float(), nullable=False)
     pricechd = db.Column(db.Float(), nullable=False)
     roomtype = db.Column(db.Integer(), db.ForeignKey('roomtype.id', ondelete='NO ACTION'))
-    roomno = db.Column(db.Integer(), nullable=False)
+    roomno = db.Column(db.Integer(), unique=True, nullable=False)
 
 
 class RoomType(BaseDataModel):
@@ -402,7 +402,6 @@ class RoomType(BaseDataModel):
     currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
     price = db.Column(db.Float(), nullable=False)
     pricechd = db.Column(db.Float(), nullable=False)
-    roomno = db.Column(db.Integer(), nullable=False)
 
 # class RoomState(BaseDataModel):
 
@@ -412,14 +411,14 @@ class Sale(BaseDataModel):
     description = db.Column(db.String(128))
     price = db.Column(db.Float(), nullable=False)
     currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
-    reservation = db.Column(db.Integer(), db.ForeignKey('reservation.id', ondelete='NO ACTION'))
+    reservationid = db.Column(db.Integer(), db.ForeignKey('reservation.id', ondelete='NO ACTION'))
 
 
-class Cost(BaseDataModel):
-    __tablename__ = 'cost'
-    description = db.Column(db.String(128))
-    price = db.Column(db.Float(), nullable=False)
-    currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
+# class Cost(BaseDataModel):
+#     __tablename__ = 'cost'
+#     description = db.Column(db.String(128))
+#     price = db.Column(db.Float(), nullable=False)
+#     currency = db.Column(db.Integer(), db.ForeignKey('currency.id', ondelete='NO ACTION'), default=1)
 
 
 class Reservation(BaseDataModel):

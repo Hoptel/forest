@@ -112,6 +112,7 @@ def get_user_info():
         # 'shortcode': g.user.shortcode,
     }, spuriousParameters=list(request.args.to_dict().keys()))
 
+
 # TODO replace with proper endpoints once testing is done
 @user_blueprint.route('/resource')
 @auth.login_required(3)
