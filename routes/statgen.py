@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import extensions
-from datetime import datetime
-from models import Sale, Reservation
+from models import Sale, Reservation, Room
 from flask import request, Blueprint
 from sqlalchemy import and_
 
@@ -27,7 +26,7 @@ def sales():
         salesrev += sale.price
         if (sale.reservationid is not None):
             salesroom += 1
-    
+
     returnData = {'salesroom': salesroom, 'salespax': salespax, 'salesrev': salesrev}
 
     return dataResultSuccess(returnData, spuriousParameters=args)
@@ -61,7 +60,7 @@ def revenue():
 
     for sale in sales:
         nettotal += sale.price
-    
+
     revadr = nettotal / timePeriod.days
     revpar = nettotal / availableRooms
     roomrev = nettotal / roomCount
