@@ -10,11 +10,11 @@ auth = extensions.auth
 db = extensions.db
 dataResultSuccess = extensions.dataResultSuccess
 
-roomtype_blueprint = Blueprint("room", __name__, url_prefix='/room')
+room_blueprint = Blueprint("room", __name__, url_prefix='/room')
 
 
 @auth.login_required(1)
-@roomtype_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'UPDATE'])
+@room_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def endpoint_employee():
     if (request.method == 'POST'):
         return table_ins(Room)

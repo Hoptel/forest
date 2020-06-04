@@ -13,7 +13,7 @@ reservation_blueprint = Blueprint("reservation", __name__, url_prefix='/reservat
 
 
 @auth.login_required(1)
-@reservation_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'UPDATE'])
+@reservation_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def endpoint_employee():
     if (request.method == 'POST'):
         return table_ins(Reservation)

@@ -9,11 +9,11 @@ db = extensions.db
 dataResultSuccess = extensions.dataResultSuccess
 stringToDateTime = extensions.stringToDateTime
 
-statgen_blueprint = Blueprint("reservat", __name__, url_prefix='/stat/gen')
+statgen_blueprint = Blueprint("statgen", __name__, url_prefix='/stat/gen')
 
 
 @auth.login_required(1)
-@statgen_blueprint.route('/sales', methods=['GET'])
+@statgen_blueprint.route('/sales', methods=['GET'], endpoint='sales')
 def sales():
     args = request.args.to_dict()
     startDate = stringToDateTime(args.pop('startdate'))
@@ -33,7 +33,7 @@ def sales():
 
 
 @auth.login_required(1)
-@statgen_blueprint.route('/revenue', methods=['GET'])
+@statgen_blueprint.route('/revenue', methods=['GET'], endpoint='gen_revenue')
 def revenue():
     args = request.args.to_dict()
     startDate = stringToDateTime(args.pop('startdate'))
@@ -56,15 +56,19 @@ def revenue():
         else:
             availableRooms -= timePeriod
 
-    nettotal = 0.0
+    revenue = 0.0
 
     for sale in sales:
-        nettotal += sale.price
+        revenue += sale.price
+    revadr = 0.0
+    revpar = 0.0
+    roomrev = 0.0
+    if (timePeriod.days > 0):
+        revadr = revenue / timePeriod.days
+        if (roomCount > 0):
+            roomrev = revenue / roomCount
+            revpar = revenue / availableRooms
 
-    revadr = nettotal / timePeriod.days
-    revpar = nettotal / availableRooms
-    roomrev = nettotal / roomCount
-
-    returnData = {'nettotal': nettotal, 'revadr': revadr, 'revpar': revpar, 'roomrev': roomrev}
+    returnData = {'revenue': revenue, 'revadr': revadr, 'revpar': revpar, 'roomrev': roomrev}
 
     return dataResultSuccess(returnData, spuriousParameters=args)

@@ -12,6 +12,7 @@ dataResultSuccess = extensions.dataResultSuccess
 resultFailure = extensions.resultFailure
 resultSuccess = extensions.resultSuccess
 
+
 # This method seems to be called on everything that has [@auth.login_required],
 # if this returns true, the method gets executed, otherwise a 401 is returned
 @auth.verify_token

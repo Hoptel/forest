@@ -13,7 +13,7 @@ roomtype_blueprint = Blueprint("roomtype", __name__, url_prefix='/roomtype')
 
 
 @auth.login_required(1)
-@roomtype_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'UPDATE'])
+@roomtype_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def endpoint_employee():
     if (request.method == 'POST'):
         return table_ins(RoomType)

@@ -2,6 +2,7 @@
 import extensions
 from models import Room, Reservation
 from flask import request, Blueprint
+from datetime import timedelta
 from sqlalchemy import and_
 
 auth = extensions.auth
@@ -13,16 +14,17 @@ reservat_blueprint = Blueprint("reservat", __name__, url_prefix='/reservat')
 
 
 @auth.login_required(1)
-@reservat_blueprint.route('/forecast/day', methods=['GET'])
+@reservat_blueprint.route('/forecast/day', methods=['GET'], endpoint='forecast_day')
 def forecastDay():
     args = request.args.to_dict()
-    startDate = (args.pop('startdate'))
+    startDate = stringToDateTime(args.pop('startdate'))
     endDate = stringToDateTime(args.pop('enddate'))
     timecount = startDate
     returnData = []
 
     while timecount <= endDate:
         returnData.append(generateForecastDayData(timecount))
+        timecount += timedelta(days=1)
 
     return dataResultSuccess(returnData, spuriousParameters=args, count=len(returnData))
 
@@ -43,7 +45,7 @@ def generateForecastDayData(date):
 
 
 @auth.login_required(1)
-@reservat_blueprint.route('/forecast/totals', methods=['GET'])
+@reservat_blueprint.route('/forecast/totals', methods=['GET'], endpoint='forecast_totals')
 def forecastTotals():
     args = request.args.to_dict()
     startDate = stringToDateTime(args.pop('startdate'))
@@ -53,8 +55,11 @@ def forecastTotals():
     coroom = Reservation.query.filter(and_(Reservation.enddate >= startDate, Reservation.enddate <= endDate)).count()
     huroom = Reservation.query.filter(and_(Reservation.startdate == Reservation.enddate, Reservation.startdate >= startDate, Reservation.startdate <= endDate)).count()
     totalroom = Room.query.count()
-    occrate = (ciroom / (endDate - startDate).days) / totalroom
+    occrate = 0.0
+    if (totalroom > 0):
+        occrate = (ciroom / (endDate - startDate).days) / totalroom
+    
     # totaloccbed =
 
     returnData = {'ciroom': ciroom, 'coroom': coroom, 'huroom': huroom, 'totalroom': totalroom, 'occrate': occrate}
-    return dataResultSuccess(returnData, spuriousParameters=args)
+    return dataResultSuccess([returnData], spuriousParameters=args)

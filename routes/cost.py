@@ -13,7 +13,7 @@ cost_blueprint = Blueprint("cost", __name__, url_prefix='/cost')
 
 
 @auth.login_required(1)
-@cost_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'UPDATE'])
+@cost_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def endpoint_employee():
     if (request.method == 'POST'):
         return table_ins(Cost)

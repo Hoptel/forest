@@ -13,7 +13,7 @@ sale_blueprint = Blueprint("sale", __name__, url_prefix='/sale')
 
 
 @auth.login_required(1)
-@sale_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'UPDATE'])
+@sale_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def endpoint_employee():
     if (request.method == 'POST'):
         return table_ins(Sale)
