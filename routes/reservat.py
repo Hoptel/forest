@@ -57,7 +57,7 @@ def forecastTotals():
     totalroom = Room.query.count()
     occrate = 0.0
     if (totalroom > 0):
-        occrate = (ciroom / ((endDate - startDate).days + 1)) / totalroom
+        occrate = ((ciroom / ((endDate - startDate).days + 1)) / totalroom) * 100
     
     # totaloccbed =
 
