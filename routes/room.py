@@ -14,10 +14,10 @@ room_blueprint = Blueprint("room", __name__, url_prefix='/room')
 
 
 @auth.login_required(1)
-@room_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'DELETE'])
-def endpoint_employee():
+@room_blueprint.route('', methods=['GET', 'POST', 'PATCH', 'DELETE'], endpoint="room")
+def endpoint_room():
     if (request.method == 'POST'):
-        return table_ins(Room)
+        return table_ins()
     elif (request.method == 'GET'):
         return table_get(Room)
     elif (request.method == 'PATCH'):
@@ -28,13 +28,13 @@ def endpoint_employee():
 
 def table_ins():
     requestJson = request.get_json(force=True)
-    if ('roomtype' in requestJson.keys and requestJson['roomtype'] is not None):
-        roomType = RoomType.query.filter_by(id=requestJson['roomtype'])
-        if (roomType is not None):
-            for key in Room.__table__.columns.keys:
-                if key not in requestJson.keys:
-                    requestJson[key] = roomType[key]
-    if ('pricechd' not in requestJson.keys):
+    #if ('roomtype' in list(requestJson.keys()) and requestJson['roomtype'] is not None):
+        #roomType = RoomType.query.filter_by(id=requestJson['roomtype'])
+        #if (roomType is not None):
+            #for key in Room.__table__.columns.keys():
+                #if (key not in list(requestJson.keys()) and key != "guid"):
+                    #requestJson[key] = roomType[key]
+    if ('pricechd' not in list(requestJson.keys())):
         requestJson['pricechd'] = requestJson['price']
     item = Room(**requestJson)
     item.guid = item.guid or uuid.uuid4()

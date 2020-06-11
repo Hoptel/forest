@@ -63,7 +63,7 @@ def load():
             fileItem = DBFile.query.filter_by(masterid=masterID, code=(code[i] if type(code) is list else code)).first()
             if (fileItem is None):
                 fileguid = uuid.uuid4()
-                fileItem = DBFile(masterid=masterID, guid=fileguid, filename=filename, filetype=fileext, code=(code[i] if type(code) is list else code))
+                fileItem = DBFile(masterid=masterID, guid=fileguid, filename=filename, hotelrefno=0, filetype=fileext, code=(code[i] if type(code) is list else code))
             os.makedirs(os.path.join(sys.path[0] + "/storage/dbfile", str(masterID)), exist_ok=True)
             file.save(os.path.join(sys.path[0] + '/storage/dbfile', str(masterID), str(fileItem.guid) + '.' + fileext))
             db.session.add(fileItem)

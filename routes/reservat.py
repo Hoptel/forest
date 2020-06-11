@@ -33,7 +33,7 @@ def generateForecastDayData(date):
     returnData = dict()
 
     roomCount = Room.query.count()
-    roomOcc = Reservation.query.filter(and_(Reservation.startdate >= date, Reservation.enddate <= date)).count()
+    roomOcc = Reservation.query.filter(and_(Reservation.startdate <= date, Reservation.enddate >= date)).count()
 
     returnData['aday'] = date.day
     returnData['amonth'] = date.month
@@ -57,7 +57,7 @@ def forecastTotals():
     totalroom = Room.query.count()
     occrate = 0.0
     if (totalroom > 0):
-        occrate = (ciroom / (endDate - startDate).days) / totalroom
+        occrate = (ciroom / ((endDate - startDate).days + 1)) / totalroom
     
     # totaloccbed =
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import extensions
+from datetime import datetime
 from models import Sale, Reservation, Room
 from flask import request, Blueprint
 from sqlalchemy import and_
@@ -42,19 +43,21 @@ def revenue():
     sales = Sale.query.filter(and_(Sale.created_at >= startDate, Sale.created_at <= endDate)).all()
     reservations = Reservation.query.filter(and_(Reservation.startdate >= startDate, Reservation.startdate <= endDate)).all()
     roomCount = Room.query.count()
-    availableRooms = roomCount * timePeriod.days
+    availableRooms = roomCount * (timePeriod.days + 1)
     for room in reservations:
-        if (room.startDate >= startDate and room.endDate <= endDate):
-            availableRooms -= (room.endDate - room.startDate)
+        roomStartDate = datetime.combine(room.startdate, datetime.min.time())
+        roomEndDate = datetime.combine(room.enddate, datetime.min.time())
+        if (roomStartDate >= startDate and roomEndDate <= endDate):
+            availableRooms -= ((roomEndDate - roomStartDate).days + 1)
             continue
-        elif (room.startDate >= startDate):
-            availableRooms -= (endDate - room.startDate)
+        elif (roomStartDate >= startDate):
+            availableRooms -= ((endDate - roomStartDate).days + 1)
             continue
-        elif (room.endDate <= endDate):
-            availableRooms -= (room.endDate - startDate)
+        elif (roomEndDate <= endDate):
+            availableRooms -= ((roomEndDate - startDate).days + 1)
             continue
         else:
-            availableRooms -= timePeriod
+            availableRooms -= (timePeriod.days + 1)
 
     revenue = 0.0
 
@@ -63,8 +66,8 @@ def revenue():
     revadr = 0.0
     revpar = 0.0
     roomrev = 0.0
-    if (timePeriod.days > 0):
-        revadr = revenue / timePeriod.days
+    if ((timePeriod.days + 1) > 0):
+        revadr = revenue / (timePeriod.days + 1)
         if (roomCount > 0):
             roomrev = revenue / roomCount
             revpar = revenue / availableRooms
